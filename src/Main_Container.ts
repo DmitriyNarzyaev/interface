@@ -1,5 +1,5 @@
 import Container = PIXI.Container;
-import { Loader, Sprite, IPoint } from "pixi.js";
+import { Loader, Sprite, IPoint, TextStyle } from "pixi.js";
 import InteractionEvent = PIXI.interaction.InteractionEvent;
 
 export default class Main_Container extends Container {
@@ -13,10 +13,12 @@ export default class Main_Container extends Container {
 	private _touchDownPoint:IPoint;
 	private _startDrag:number=0;
 	private _dragDistance:number = 0;
-	private _dragIterator:number = 0;
 	private _drag1:number=0;
 	private _drag2:number=0;
+	private _dragIterator:number = 0;
+	private _personagesNameIterator:number = 0;
 	private _pictureArray:Sprite[] = [];
+	private _personagesNameText:PIXI.Text;
 	private _personagesNameArray:string[] = [
 		"Rocket Bot",		"Rocket Bot 2",
 		"Saboteur",			"Army Bot",
@@ -49,6 +51,7 @@ export default class Main_Container extends Container {
 			this.initPersonagesContainer();
 			this.invitePersonagesInContainer();
 			this.initMaskForPersonagesContainer();
+			this.initTextWindow();
 		});
 		loader.load();
 	}
@@ -149,5 +152,40 @@ export default class Main_Container extends Container {
 				this._drag2 = event.data.global.x;
 			}
 		}
+
+		if (this._dragDistance <= 8) {
+			for (let iterator:number = 0; iterator < this._pictureArray.length; iterator++) {
+				this._personagesNameIterator++;
+				if (this._touchDownPoint.x >= this._pictureArray[iterator].x
+					&& this._touchDownPoint.x <= this._pictureArray[iterator].x + this._pictureArray[iterator].width) {
+					this._personagesNameText.text = this._personagesNameArray[this._personagesNameIterator - 1];
+					break;
+				}
+			}
+			this._personagesNameIterator = 0;
+		}
+		this._touchDownPoint = null;
+	}
+
+	private initTextWindow():void {
+		let style:TextStyle = new PIXI.TextStyle ({
+				fontFamily: 'Arial',
+				align: 'Left',											//fixme
+				fontSize: 40,
+				fontWeight: 'bold',
+				fill: ['#4444ff', '#2222ff', '#4444ff'],
+				dropShadow: true,
+				dropShadowColor: '#000000',
+				dropShadowDistance:1,
+				dropShadowAngle: Math.PI / 10,
+				stroke: '#000000',
+				strokeThickness: 4
+			}
+		);
+		this._personagesNameText = new PIXI.Text('', style);
+		this._personagesNameText.text = "ВЫБЕРИТЕ ПЕРСОНАЖА";
+		this._personagesNameText.x = Main_Container.WIDTH/2 - this._personagesNameText.width/2;
+		this._personagesNameText.y = this._screenBorder.y + this._screenBorder.height;
+		this.addChild(this._personagesNameText);
 	}
 }
