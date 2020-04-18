@@ -1,5 +1,6 @@
 import Container = PIXI.Container;
-import { Loader, Sprite } from "pixi.js";
+import { Loader, Sprite, IPoint } from "pixi.js";
+import InteractionEvent = PIXI.interaction.InteractionEvent;
 
 export default class Main_Container extends Container {
 	public static readonly WIDTH:number = 1500;
@@ -8,6 +9,13 @@ export default class Main_Container extends Container {
 	private _screenBorder:Sprite;
 	private _maskForPersonagesContainer:PIXI.Graphics;
 	private _borderLineSize:number = 5;
+	private _personagesContainer:Container;
+	private _touchDownPoint:IPoint;
+	private _startDrag:number=0;
+	private _dragDistance:number = 0;
+	private _dragIterator:number = 0;
+	private _drag1:number=0;
+	private _drag2:number=0;
 	private _pictureArray:Sprite[] = [];
 	private _personagesNameArray:string[] = [
 		"Rocket Bot",		"Rocket Bot 2",
@@ -16,7 +24,6 @@ export default class Main_Container extends Container {
 		"Shark",			"Nautilus",
 		"Gunner"
 	];
-	private _personagesContainer:Container;
 
 	constructor() {
 		super();
@@ -67,6 +74,13 @@ export default class Main_Container extends Container {
 		this._personagesContainer.x = this._screenBorder.x + this._borderLineSize;
 		this._personagesContainer.y = this._screenBorder.y + this._borderLineSize;
 		this.addChild(this._personagesContainer);
+		this._personagesContainer
+			.addListener('mousedown', this.onDragStart, this)
+			.addListener('touchstart', this.onDragStart, this)
+			.addListener('mouseup', this.onDragEnd, this)
+			.addListener('mouseupoutside', this.onDragEnd, this)
+			.addListener('touchend', this.onDragEnd, this)
+			.addListener('touchendoutside', this.onDragEnd, this);
 	}
 
 	private initMaskForPersonagesContainer():void {
@@ -97,6 +111,43 @@ export default class Main_Container extends Container {
 			personage.x = personageX;
 			personageX += personage.width;
 			this._pictureArray.push(personage);
+		}
+	}
+
+	private onDragStart(event:InteractionEvent):void {
+		this._touchDownPoint = this._personagesContainer.toLocal(event.data.global);
+		this._personagesContainer.addListener('mousemove', this.onDragMove, this);
+		this._personagesContainer.addListener('touchmove', this.onDragMove, this);
+		this._startDrag = event.data.global.x;
+	}
+
+	private onDragMove(event:InteractionEvent):void {
+		const newPosition:IPoint = this.toLocal(event.data.global);
+		this._personagesContainer.x = newPosition.x - this._touchDownPoint.x;
+		const maxX:number = this._screenBorder.x + this._borderLineSize;
+		if (this._personagesContainer.x > maxX) {
+			this._personagesContainer.x = maxX;
+		}
+		const minX:number = this._screenBorder.x +
+			this._screenBorder.width -
+			this._personagesContainer.width -
+			this._borderLineSize;
+		if (this._personagesContainer.x < minX) {
+			this._personagesContainer.x = minX;
+		}
+	}
+
+	private onDragEnd(event:InteractionEvent):void {
+		this._personagesContainer.removeListener('mousemove', this.onDragMove, this);
+		this._personagesContainer.removeListener('touchmove', this.onDragMove, this);
+		this._dragDistance = Math.abs(this._startDrag - event.data.global.x);
+		this._dragIterator++;
+		if (this._drag1 !==0 && this._drag2 !==0) {
+			if (this._dragIterator == 1) {
+				this._drag1 = event.data.global.x;
+			} else if (this._dragIterator == 2) {
+				this._drag2 = event.data.global.x;
+			}
 		}
 	}
 }
