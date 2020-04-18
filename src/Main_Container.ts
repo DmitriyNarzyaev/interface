@@ -6,6 +6,7 @@ export default class Main_Container extends Container {
 	public static readonly HEIGHT:number = 900;
 	private _background:Sprite;
 	private _screenBorder:Sprite;
+	private _maskForPersonagesContainer:PIXI.Graphics;
 	private _borderLineSize:number = 5;
 	private _pictureArray:Sprite[] = [];
 	private _personagesNameArray:string[] = [
@@ -40,6 +41,7 @@ export default class Main_Container extends Container {
 			this.initPersonagesChangeWindow();
 			this.initPersonagesContainer();
 			this.invitePersonagesInContainer();
+			this.initMaskForPersonagesContainer();
 		});
 		loader.load();
 	}
@@ -65,6 +67,24 @@ export default class Main_Container extends Container {
 		this._personagesContainer.x = this._screenBorder.x + this._borderLineSize;
 		this._personagesContainer.y = this._screenBorder.y + this._borderLineSize;
 		this.addChild(this._personagesContainer);
+	}
+
+	private initMaskForPersonagesContainer():void {
+		const maskForPersonagesContainerWidth:number = this._screenBorder.width - this._borderLineSize*2;
+		const maskForPersonagesContainerHeight:number =  this._screenBorder.height - this._borderLineSize*2;
+		this._maskForPersonagesContainer = new PIXI.Graphics();
+		this._maskForPersonagesContainer.beginFill(0x880000);
+		this._maskForPersonagesContainer.drawRect(
+			0,
+			0,
+			maskForPersonagesContainerWidth,
+			maskForPersonagesContainerHeight
+		);
+		this._maskForPersonagesContainer.endFill();
+		this._maskForPersonagesContainer.x = this._screenBorder.x + this._borderLineSize;
+		this._maskForPersonagesContainer.y = this._screenBorder.y + this._borderLineSize;
+		this.addChild(this._maskForPersonagesContainer);
+		this._personagesContainer.mask = this._maskForPersonagesContainer;
 	}
 
 	private invitePersonagesInContainer():void {
