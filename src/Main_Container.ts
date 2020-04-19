@@ -49,7 +49,7 @@ export default class Main_Container extends Container {
 			this.initBackground();
 			this.initPersonagesChangeWindow();
 			this.initPersonagesContainer();
-			this.invitePersonagesInContainer();
+			this.addPersonagesInContainer();
 			this.initMaskForPersonagesContainer();
 			this.initTextWindow();
 		});
@@ -104,7 +104,7 @@ export default class Main_Container extends Container {
 		this._personagesContainer.mask = this._maskForPersonagesContainer;
 	}
 
-	private invitePersonagesInContainer():void {
+	private addPersonagesInContainer():void {
 		let personageX:number = 0;
 		for (let iterator:number = 0; iterator < this._personagesNameArray.length; iterator++) {
 			const personage:Sprite = Sprite.from(this._personagesNameArray[iterator]);
@@ -158,7 +158,7 @@ export default class Main_Container extends Container {
 				this._personagesNameIterator++;
 				if (this._touchDownPoint.x >= this._pictureArray[iterator].x
 					&& this._touchDownPoint.x <= this._pictureArray[iterator].x + this._pictureArray[iterator].width) {
-					this._personagesNameText.text = this._personagesNameArray[this._personagesNameIterator - 1];
+					this.setPersonagesNameTextAndAlignField(this._personagesNameArray[this._personagesNameIterator - 1]);
 					break;
 				}
 			}
@@ -169,8 +169,7 @@ export default class Main_Container extends Container {
 
 	private initTextWindow():void {
 		let style:TextStyle = new PIXI.TextStyle ({
-				fontFamily: 'Arial',
-				align: 'Left',											//fixme
+				fontFamily: 'Arial',											//fixme
 				fontSize: 40,
 				fontWeight: 'bold',
 				fill: ['#4444ff', '#2222ff', '#4444ff'],
@@ -183,9 +182,13 @@ export default class Main_Container extends Container {
 			}
 		);
 		this._personagesNameText = new PIXI.Text('', style);
-		this._personagesNameText.text = "ВЫБЕРИТЕ ПЕРСОНАЖА";
-		this._personagesNameText.x = Main_Container.WIDTH/2 - this._personagesNameText.width/2;
+		this.setPersonagesNameTextAndAlignField("ВЫБЕРИТЕ ПЕРСОНАЖА");
 		this._personagesNameText.y = this._screenBorder.y + this._screenBorder.height;
 		this.addChild(this._personagesNameText);
+	}
+
+	private setPersonagesNameTextAndAlignField(text:string)	{
+		this._personagesNameText.text = text;
+		this._personagesNameText.x = Main_Container.WIDTH/2 - this._personagesNameText.width/2;
 	}
 }
